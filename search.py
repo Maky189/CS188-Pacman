@@ -121,7 +121,7 @@ def depthFirstSearch(problem: SearchProblem):
             return actions
         
         for neighbor in problem.getSuccessors(this):
-            if (neighbor[0] not in visited and neighbor[0] not in problem):
+            if (neighbor[0] not in visited):
                 visited.append(neighbor[0])
                 actions.append(neighbor[1])
                 stack.push(neighbor[0])
