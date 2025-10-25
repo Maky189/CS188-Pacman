@@ -97,8 +97,8 @@ def depthFirstSearch(problem: SearchProblem):
 
     while S is not empty:
         current = pop from S
-        process(current)              // e.g., print or record current node
-
+        process(current)             
+        
         for each neighbor in adjacency_list[current]:
             if neighbor is not visited:
                 mark neighbor as visited
@@ -109,22 +109,20 @@ def depthFirstSearch(problem: SearchProblem):
     visited = []
 
     start = problem.getStartState()
-    print("Start:", problem.getStartState())
-    stack.push(start)
-    visited.append(start)
-    actions = []
-
+    stack.push((start, []))
+    
     while not stack.isEmpty():
-        this = stack.pop()
+        this, path = stack.pop()
         
-        if (problem.isGoalState(this)):
-            return actions
-        
-        for neighbor in problem.getSuccessors(this):
-            if (neighbor[0] not in visited):
-                visited.append(neighbor[0])
-                actions.append(neighbor[1])
-                stack.push(neighbor[0])
+        if this not in visited:
+            visited.append(this)
+            
+            if problem.isGoalState(this):
+                return path
+            
+            for neighbor, action, cost in problem.getSuccessors(this):
+                if neighbor not in visited:
+                    stack.push((neighbor, path + [action]))
 
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
