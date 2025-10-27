@@ -10,6 +10,7 @@
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
+import math
 
 
 """
@@ -150,7 +151,25 @@ def breadthFirstSearch(problem: SearchProblem):
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    queue = util.PriorityQueue()
+    start = problem.getStartState()
+    queue.push((start, [], 0), 0)
+    frontier = {start: 0}
+
+    while not queue.isEmpty():
+        state, path, cost = queue.pop()
+        if cost > frontier.get(state, float(math.inf)):
+            continue
+        if problem.isGoalState(state):
+            return path
+        
+        for successor, action, stepcost in problem.getSuccessors(state):
+            new_cost = cost + stepcost
+
+            if new_cost < frontier.get(successor, float(math.inf)):
+                frontier[successor] = new_cost
+                queue.push((successor, path + [action], new_cost), new_cost)
+    return None
 
 def nullHeuristic(state, problem=None):
     """
