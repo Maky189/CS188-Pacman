@@ -38,11 +38,11 @@ from typing import List, Tuple, Any
 from game import Directions
 from game import Agent
 from game import Actions
-from itertools import permutations
 import util
 import time
 import search
 import pacman
+import math
 
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
@@ -290,6 +290,7 @@ class CornersProblem(search.SearchProblem):
             if not startingGameState.hasFood(*corner):
                 print('Warning: no food in corner ' + str(corner))
         self._expanded = 0 # DO NOT CHANGE; Number of search nodes expanded
+        self.startingGameState = startingGameState
 
     def getStartState(self):
         """
@@ -297,17 +298,14 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        pos = self.startingPosition
-        visited = [pos == corner for corner in self.corners]
-        return (pos, tuple(visited))
+        return self.startingPosition()
 
     def isGoalState(self, state: Any):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        return all(state[1])
-        
+        return len(self.corners) == len(state[1])
     def getSuccessors(self, state: Any):
         """
         Returns successor states, the actions they require, and a cost of 1.
@@ -322,17 +320,26 @@ class CornersProblem(search.SearchProblem):
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
-            successor = state.generatePacmanSuccessor(action)
             # Here's a code snippet for figuring out whether a new position hits a wall:
-            x,y = state
-            dx, dy = Actions.directionToVector(action)
-            nextx, nexty = int(x + dx), int(y + dy)
-            hitsWall = self.walls[nextx][nexty]
+            #   x,y = currentPosition
+            #   dx, dy = Actions.directionToVector(action)
+            #   nextx, nexty = int(x + dx), int(y + dy)
+            #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
+            x, y = state[0]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y +dy)
+            hitsWall = self.walls[nextx][nexty]
             if not hitsWall:
-                successors.append((successor, action, 1))
+                next_position = (nextx, nexty)
+                new_state = (next_position, state[1])
+                if next_position in self.corners:
+                    if next_position not in state[1]:
+                        new_state = (next_position, (state[1] + (next_position,)))
+                successors.append((new_state, action, 1))
 
+        self._expanded += 1 # DO NOT CHANGE
         return successors
 
     def getCostOfActions(self, actions):
@@ -366,26 +373,31 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    visit = []
-    for i in range (len(corners)):
-        if state.visited[i] == False:
-            visit.append(corners[i])
-
-    if len(visit) == 0:
-        return 0
-    funcao = -1
-    for each in permutations(visit):
-        x = 0
-        position = state.pacmanPosition
-        for way in each:
-            x += util.manhattanDistance(way, position)
-            position = way
-        if funcao == -1:
-            funcao = x
-        else:
-            funcao = min(funcao, x)
-
-    return funcao # Default to trivial solution
+    def manhattanDis(point1, point2):
+        xy1 = point1
+        xy2 = point2
+        return abs(xy1[0] - xy2[0] + abs(xy1[1] - xy2[1]))
+    
+    def manhattanSum(pos, unseen, sum):
+        if unseen == []:
+            sums.append(sum)
+        for item in unseen:
+            tmp = list(unseen)
+            tmp.remove(item)
+            sum += manhattanDis(pos, item)
+            manhattanSum(item, tmp, sum)
+            sum -= manhattanDis(pos, item)
+    
+    sums = []
+    unseen = []
+    point = state[0]
+    for corner in corners:
+        if corner not in state[1]:
+            unseen.append(corner)
+    manhattanSum(point, unseen, 0)
+    sum = min(sums)
+    return sum
+    return 0 # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -479,7 +491,20 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    distances = []
+    listgrid = foodGrid.asList()
+
+    for food_cordinate in listgrid:
+        if (position, food_cordinate) in problem.heuristicInfo:
+            distances.append(problem.heuristicInfo[(position, food_cordinate)])
+        else:
+            value = mazeDistance(position, food_cordinate, problem.startingGameState)
+            problem.heuristicInfo[(position, food_cordinate)] = value
+            distances.append(value)
+
+    if not distances:
+        return 0
+    return max(distances)
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -510,6 +535,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
+        return search.ucs(problem)
         util.raiseNotDefined()
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -546,6 +572,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
+        return state in self.food.asList()
         util.raiseNotDefined()
 
 def mazeDistance(point1: Tuple[int, int], point2: Tuple[int, int], gameState: pacman.GameState) -> int:
