@@ -3,6 +3,7 @@
 This README documents the Project 1 (Search) assignment, explains how each required function was implemented, and includes algorithm explanations.
 
 # Welcome to Pacman
+![](maze.png)
 
 After downloading the code, unzipping it, and changing to the directory, you should be able to play a game of Pacman by typing the following at the command line:
 
