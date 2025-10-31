@@ -298,7 +298,9 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        return self.startingPosition()
+        # start state: (position, visitedCorners)
+        # visitedCorners is a tuple of corner positions visited so far (empty at start)
+        return (self.startingPosition, ())
 
     def isGoalState(self, state: Any):
         """
@@ -376,7 +378,7 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     def manhattanDis(point1, point2):
         xy1 = point1
         xy2 = point2
-        return abs(xy1[0] - xy2[0] + abs(xy1[1] - xy2[1]))
+        return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
     
     def manhattanSum(pos, unseen, sum):
         if unseen == []:
