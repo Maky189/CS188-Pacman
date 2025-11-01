@@ -3,7 +3,7 @@
 This README documents the Project 1 (Search) assignment, explains how each required function was implemented, and includes algorithm explanations.
 
 # Welcome to Pacman
-![](maze.png)
+![](pacman_game.gif)
 
 After downloading the code, unzipping it, and changing to the directory, you should be able to play a game of Pacman by typing the following at the command line:
 
@@ -273,16 +273,12 @@ Explanation:
 - For each successor, update if the new path has a lower cost and push into the priority queue.
 
 ### Manhattan Distance
+![](manhattandistance.png) 
+A set of (x,y) coordinates to serve as heuristic of how close the agent is in relation to the goal.
 
+
+---
 However, it is important to emphasize that, as with any heuristic, it can go wrong and lead the algorithm down a slower path than it would have gone otherwise. It is possible that an uninformed search algorithm will provide a better solution faster, but it is less likely to do so than an informed algorithm.
-A* Search
-
-A development of the greedy best-first algorithm, A* search considers not only h(n), the estimated cost from the current location to the goal, but also g(n), the cost that was accrued until the current location. By combining both these values, the algorithm has a more accurate way of determining the cost of the solution and optimizing its choices on the go. The algorithm keeps track of (cost of path until now + estimated cost to the goal), and once it exceeds the estimated cost of some previous option, the algorithm will ditch the current path and go back to the previous option, thus preventing itself from going down a long, inefficient path that h(n) erroneously marked as best.
-
-Yet again, since this algorithm, too, relies on a heuristic, it is as good as the heuristic that it employs. It is possible that in some situations it will be less efficient than greedy best-first search or even the uninformed algorithms. For A* search to be optimal, the heuristic function, h(n), should be:
-
-Admissible, or never overestimating the true cost, and
-Consistent, which means that the estimated path cost to the goal of a new node in addition to the cost of transitioning to it from the previous node is greater or equal to the estimated path cost to the goal of the previous node. To put it in an equation form, h(n) is consistent if for every node n and successor node n’ with step cost c, h(n) ≤ h(n’) + c.
 
 ## A* Search
 
@@ -466,8 +462,6 @@ def findPathToClosestDot(self, gameState: pacman.GameState):
     food = gameState.getFood()
     walls = gameState.getWalls()
     problem = AnyFoodSearchProblem(gameState)
-
-    "*** YOUR CODE HERE ***"
     return search.ucs(problem)
 ```
 
@@ -475,9 +469,7 @@ Code (AnyFoodSearchProblem.isGoalState):
 
 ```python
 def isGoalState(self, state: Tuple[int, int]):
-    x,y = state
-
-    "*** YOUR CODE HERE ***"
+    x,y = stat
     return state in self.food.asList()
 ```
 
